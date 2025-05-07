@@ -1,0 +1,24 @@
+int* plusOne(int* digits, int digitsSize, int* returnSize) {
+    int zeroStartNext = digitsSize - 1;
+    // Find where the carry terminates
+    while (zeroStartNext >= 0 && digits[zeroStartNext] == 9) --zeroStartNext;
+    
+    // It's a series of 9's - Early Exit
+    if (zeroStartNext < 0)
+    {
+        *returnSize = digitsSize + 1;
+        int *out = (int*)calloc(sizeof(int), *returnSize); // Calloc to 0-initialize fast
+        out[0] = 1;
+        return out;
+    }
+
+    // Regular case where carry doesn't make it all the way to the highest digit
+    *returnSize = digitsSize;
+    int *out = (int*)calloc(sizeof(int), *returnSize);
+    for (int i = 0; i < zeroStartNext; ++i)
+    {
+        out[i] = digits[i]; // Copy values upto zeroStartNext - 1
+    }
+    out[zeroStartNext] = digits[zeroStartNext] + 1; // Apply carry to the last non-9 digit
+    return out;
+}

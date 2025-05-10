@@ -1,0 +1,10 @@
+int mySqrt(int x) {
+    return (int)sqrt(x); 
+    printf("%d\n", mySqrt(8));   
+    printf("%d\n", mySqrt(16)); 
+    printf("%d\n", mySqrt(27));  
+
+
+}
+
+

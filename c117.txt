@@ -1,0 +1,45 @@
+// Online C compiler to run C program online
+#include <stdio.h>
+#include <string.h>
+
+#define MAX_LEN 3000 // Assume a reasonable maximum path length
+
+// Function to simplify the Unix-style path
+char* simplifyPath(char* path) {
+    char* stack[MAX_LEN]; // Stack to store directory names
+    int top = -1;         // Stack pointer
+    
+    char* token = strtok(path, "/"); // Split path by '/'
+    
+    while (token != NULL) {
+        if (strcmp(token, "..") == 0) {
+            if (top >= 0) {
+                top--; // Go up one directory (pop stack)
+            }
+        } else if (strcmp(token, ".") != 0 && strlen(token) > 0) {
+            stack[++top] = token; // Push valid directory name onto stack
+        }
+        token = strtok(NULL, "/");
+    }
+
+    // Construct the simplified path
+    static char result[MAX_LEN];
+    result[0] = '\0';
+
+    if (top == -1) {
+        strcpy(result, "/"); // Root directory case
+    } else {
+        for (int i = 0; i <= top; i++) {
+            strcat(result, "/");
+            strcat(result, stack[i]);
+        }
+    }
+    
+    return result;
+}
+
+int main() {
+    char path[MAX_LEN] = ""/home/"";
+    printf("Simplified Path: %s\n", simplifyPath(path));
+    return 0;
+}

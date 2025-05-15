@@ -1,0 +1,56 @@
+Minimum Window Substring
+7:36 PM 3/16/2025
+
+
+
+
+
+
+
+
+#include <stdio.h>
+#include <string.h>
+#include <limits.h>
+
+#pragma GCC optimize("O3", "unroll-loops")
+char* minWindow(char* s, char* t) {
+    int n = strlen(s), tn = 0;
+    int left = 0;
+    int mp[64] = {0}, tmp[64] = {0};
+
+    for (char* p = t; *p != '\0'; p++) {
+        int idx = 0x3f & (*p);
+        tmp[idx]++;
+        tn++;
+    }
+
+    int count = 0;
+    int minLength = INT_MAX, minLeft = 0;
+
+    for (register int right = 0; right < n; right++) {  // Explicit int declaration
+        int idx = 0x3f & s[right];
+
+        if (tmp[idx] == 0) continue;
+        mp[idx]++;
+
+        if (mp[idx] <= tmp[idx]) count++;
+
+        if (count == tn) {
+            int idx_left;
+            while (tmp[(idx_left = 0x3f & s[left])] == 0 || mp[idx_left] > tmp[idx_left]) {
+                if (mp[idx_left] != 0) mp[idx_left]--;
+                left++;
+            }
+
+            if (right - left + 1 < minLength) {
+                minLength = right - left + 1;
+                minLeft = left;
+            }
+        }
+    }
+
+    if (minLength == INT_MAX) return "";
+
+    s[minLeft + minLength] = '\0';
+    return s + minLeft;
+}

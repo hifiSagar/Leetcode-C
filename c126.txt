@@ -1,0 +1,34 @@
+#define max(a, b) ((a) > (b) ? (a) : (b))
+typedef struct
+{
+  int index;
+  int height;
+} Node;
+
+int largestRectangleArea(int *heights, int heightsSize)
+{
+  Node stack[heightsSize];
+  Node *curNode;
+  int top = 0, ans = 0, newIndex;
+
+  for (int i = 0; i < heightsSize; i++)
+  {
+    newIndex = i;
+    while (top && stack[top - 1].height >= heights[i])
+    {
+      curNode = &(stack[--top]);
+      ans = max(ans, curNode->height * (i - curNode->index));
+      newIndex = curNode->index;
+    }
+    stack[top++] = (Node){newIndex, heights[i]};
+  }
+
+  while (top && stack[top - 1].height)
+  {
+
+    curNode = &(stack[--top]);
+    ans = max(ans, curNode->height * (heightsSize - curNode->index));
+  }
+
+  return ans;
+}

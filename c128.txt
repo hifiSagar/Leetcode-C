@@ -1,0 +1,23 @@
+struct ListNode* partition(struct ListNode* head, int x) {
+    struct ListNode beforeHead = {0, NULL};
+    struct ListNode afterHead = {0, NULL};
+
+    struct ListNode* before = &beforeHead;
+    struct ListNode* after = &afterHead;
+
+    while (head != NULL) {
+        if (head->val < x) {
+            before->next = head;
+            before = before->next;
+        } else {
+            after->next = head;
+            after = after->next;
+        }
+        head = head->next;
+    }
+
+    after->next = NULL;
+    before->next = afterHead.next;
+
+    return beforeHead.next;
+}

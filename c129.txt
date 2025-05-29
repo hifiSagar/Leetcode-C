@@ -1,0 +1,57 @@
+#include <stdbool.h>
+#include <string.h>
+
+bool isAnagram(const char* s1, const char* s2, int len) {
+    int count[26] = {0};
+    for (int i = 0; i < len; i++) {
+        count[s1[i] - 'a']++;
+        count[s2[i] - 'a']--;
+    }
+    for (int i = 0; i < 26; i++) {
+        if (count[i] != 0) return false;
+    }
+    return true;
+}
+
+int dp[31][31][31];
+
+bool isScrambleUtil(const char* s1, const char* s2, int start1, int start2, int length) {
+    if (dp[start1][start2][length] != 0) {
+        return dp[start1][start2][length] == 1;
+    }
+    
+    if (strncmp(s1 + start1, s2 + start2, length) == 0) {
+        dp[start1][start2][length] = 1;
+        return true;
+    }
+    if (!isAnagram(s1 + start1, s2 + start2, length)) {
+        dp[start1][start2][length] = -1;
+        return false;
+    }
+    
+    for (int i = 1; i < length; i++) {
+        if (isScrambleUtil(s1, s2, start1, start2, i) &&
+            isScrambleUtil(s1, s2, start1 + i, start2 + i, length - i)) {
+            dp[start1][start2][length] = 1;
+            return true;
+        }
+        
+        if (isScrambleUtil(s1, s2, start1, start2 + length - i, i) &&
+            isScrambleUtil(s1, s2, start1 + i, start2, length - i)) {
+            dp[start1][start2][length] = 1;
+            return true;
+        }
+    }
+    
+    dp[start1][start2][length] = -1;
+    return false;
+}
+
+bool isScramble(char* s1, char* s2) {
+    int len = strlen(s1);
+    if (len != strlen(s2)) return false;
+    
+    memset(dp, 0, sizeof(dp));
+    
+    return isScrambleUtil(s1, s2, 0, 0, len);
+}

@@ -1,0 +1,32 @@
+int bit_set(int number, int n) {
+    return number | (1 << n);
+}
+
+/*
+void printArr(int* arr, int size) {
+    for(int loop = 0; loop < size; loop++){
+        printf("%d ", arr[loop]);
+    }
+    printf("\n");
+}
+*/
+
+int* grayCode(int n, int* returnSize) {
+    *returnSize = 1 << n;
+    int* arr = calloc(*returnSize, sizeof(int));
+
+    bool flag;
+
+    for (int bit = 0; bit < n; bit++) {
+        int skip = 1 << bit;
+        int loop = skip << 2;
+        for (int num = skip; num < *returnSize; num++) {
+            if ((num - skip) % loop < (loop >> 1)) {
+                arr[num] = bit_set(arr[num], bit);
+            }
+        }
+        // printf("skip = %d, loop = %d\n", skip, loop);
+        // printArr(arr, *returnSize);
+    }
+    return arr;
+}

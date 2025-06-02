@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+typedef struct {
+    int key;
+    int value;
+} Entry;
+
+int compare(const void *a, const void *b) {
+    Entry *ea = (Entry *)a;
+    Entry *eb = (Entry *)b;
+    return ea->key - eb->key;
+}
+
+int ceilingIndex(Entry *map, int size, int key) {
+    int lo = 0, hi = size - 1, result = -1;
+    while (lo <= hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (map[mid].key >= key) {
+            result = mid;
+            hi = mid - 1;
+        } else {
+            lo = mid + 1;
+        }
+    }
+    return result;
+}
+
+int floorIndex(Entry *map, int size, int key) {
+    int lo = 0, hi = size - 1, result = -1;
+    while (lo <= hi) {
+        int mid = lo + (hi - lo) / 2;
+        if (map[mid].key <= key) {
+            result = mid;
+            lo = mid + 1;
+        } else {
+            hi = mid - 1;
+        }
+    }
+    return result;
+}
+
+int oddEvenJumps(int* arr, int n) {
+    bool* higher = calloc(n, sizeof(bool));
+    bool* lower = calloc(n, sizeof(bool));
+    Entry* map = malloc(n * sizeof(Entry));
+    int mapSize = 0, res = 1;
+
+    higher[n - 1] = lower[n - 1] = true;
+    map[mapSize++] = (Entry){arr[n - 1], n - 1};
+
+    for (int i = n - 2; i >= 0; --i) {
+        int ci = ceilingIndex(map, mapSize, arr[i]);
+        int fi = floorIndex(map, mapSize, arr[i]);
+
+        if (ci != -1)
+            higher[i] = lower[map[ci].value];
+
+        if (fi != -1)
+            lower[i] = higher[map[fi].value];
+
+        if (higher[i])
+            res++;
+
+        map[mapSize++] = (Entry){arr[i], i};
+        qsort(map, mapSize, sizeof(Entry), compare);  // Keep map sorted
+    }
+
+    free(higher);
+    free(lower);
+    free(map);
+    return res;
+}

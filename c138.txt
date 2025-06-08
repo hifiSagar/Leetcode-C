@@ -1,0 +1,110 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+#define TABLE_SIZE 10001
+
+typedef struct entry {
+    int key;
+    int value;
+    int is_occupied;
+} entry;
+
+typedef struct {
+    entry **buckets;
+    int capacity;
+} MyHashMap;
+
+entry *make_pair(int key, int value) {
+    entry *e = malloc(sizeof(entry));
+    e->key = key;
+    e->value = value;
+    e->is_occupied = 1;
+    return e;
+}
+
+MyHashMap* myHashMapCreate() {
+    int size = TABLE_SIZE;
+    MyHashMap *map = malloc(sizeof(MyHashMap));
+    map->buckets = malloc(sizeof(entry*) * size);
+    map->capacity = 0;
+    for (int i = 0; i < size; i++) map->buckets[i] = NULL;
+    return map;
+}
+
+size_t hash1(int key) {
+    uint32_t x = (uint32_t)key;
+    x = ((x >> 16) ^ x) * 0x119de1f3;
+    x = ((x >> 16) ^ x) * 0x119de1f3;
+    x = (x >> 16) ^ x;
+    return x % TABLE_SIZE;
+}
+
+size_t hash2(int key) {
+    int t = TABLE_SIZE;
+    uint32_t x = (uint32_t)key;
+    x = ((x >> 16) ^ x) * 0x27d4eb2d;
+    x = ((x >> 16) ^ x) * 0x27d4eb2d;
+    x = (x >> 16) ^ x;
+    return (x % (t - 1)) + 1;
+}
+
+void myHashMapPut(MyHashMap* obj, int key, int value) {
+    int size = TABLE_SIZE;
+    unsigned int h1 = hash1(key), h2 = hash2(key);
+    for (int i = 0; i < size; i++) {
+        int index = (h1 + i * h2) % size;
+        entry *e = obj->buckets[index];
+        if (e == NULL) {
+            obj->buckets[index] = make_pair(key, value);
+            obj->capacity++;
+            break;
+        }
+        if (e->is_occupied == 0) {
+            e->key = key;
+            e->value = value;
+            e->is_occupied = 1;
+            break;
+        }
+        if (e->is_occupied == 1 && e->key == key) {
+            e->value = value;
+            break;
+        }
+    }
+}
+
+int myHashMapGet(MyHashMap* obj, int key) {
+    int size = TABLE_SIZE;
+    unsigned int h1 = hash1(key), h2 = hash2(key);
+    for (int i = 0; i < size; i++) {
+        int index = (h1 + i * h2) % size;
+        entry *e = obj->buckets[index];
+        if (e == NULL) break;
+        if (e->is_occupied == 0) continue;
+        if (e->key == key) return e->value;
+    }
+    return -1;
+}
+
+void myHashMapRemove(MyHashMap* obj, int key) {
+    int size = TABLE_SIZE;
+    unsigned int h1 = hash1(key), h2 = hash2(key);
+    for (int i = 0; i < size; i++) {
+        int index = (h1 + i * h2) % size;
+        entry *e = obj->buckets[index];
+        if (e == NULL) return;
+        if (e->is_occupied == 0) continue;
+        if (e->key == key) {
+            e->is_occupied = 0;
+            return;
+        }
+    }
+}
+
+void myHashMapFree(MyHashMap* obj) {
+    int size = TABLE_SIZE;
+    for (int i = 0; i < size; i++)
+        if (obj->buckets[i]) free(obj->buckets[i]);
+    free(obj->buckets);
+    free(obj);
+}

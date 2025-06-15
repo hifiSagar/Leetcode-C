@@ -1,0 +1,173 @@
+#include <stdlib.h>
+
+typedef struct DLL {
+    int val;
+    struct DLL *next;
+    struct DLL *prev;
+} DLL;
+
+typedef struct {
+    int curSize;
+    DLL *LL;
+    DLL *front;
+    DLL *middle;
+    DLL *rear;
+} FrontMiddleBackQueue;
+
+FrontMiddleBackQueue* frontMiddleBackQueueCreate() {
+    FrontMiddleBackQueue* obj = (FrontMiddleBackQueue*)malloc(sizeof(FrontMiddleBackQueue));
+    obj->curSize = 0;
+    obj->LL = NULL;
+    obj->front = NULL;
+    obj->middle = NULL;
+    obj->rear = NULL;
+    return obj;
+}
+
+void frontMiddleBackQueuePushFront(FrontMiddleBackQueue* obj, int value) {
+    DLL* D = (DLL*)malloc(sizeof(DLL));
+    D->val = value;
+    D->next = NULL;
+    D->prev = NULL;
+
+    if (obj->curSize == 0) {
+        obj->LL = obj->front = obj->rear = obj->middle = D;
+    } else {
+        D->next = obj->front;
+        obj->front->prev = D;
+        obj->front = D;
+        if (obj->curSize % 2 == 1) {
+            obj->middle = obj->middle->prev;
+        }
+    }
+    obj->curSize++;
+}
+
+void frontMiddleBackQueuePushMiddle(FrontMiddleBackQueue* obj, int value) {
+    DLL* D = (DLL*)malloc(sizeof(DLL));
+    D->val = value;
+    D->next = NULL;
+    D->prev = NULL;
+
+    if (obj->curSize == 0) {
+        obj->LL = obj->front = obj->rear = obj->middle = D;
+    } else if (obj->curSize == 1) {
+        D->next = obj->middle;
+        obj->middle->prev = D;
+        obj->middle = D;
+        obj->front = D;
+    } else {
+        if (obj->curSize % 2 == 1) {
+            D->next = obj->middle;
+            D->prev = obj->middle->prev;
+            if (obj->middle->prev) obj->middle->prev->next = D;
+            obj->middle->prev = D;
+            if (obj->middle == obj->front) obj->front = D;
+            obj->middle = D;
+        } else {
+            D->next = obj->middle->next;
+            D->prev = obj->middle;
+            if (obj->middle->next) obj->middle->next->prev = D;
+            obj->middle->next = D;
+            obj->middle = D;
+        }
+    }
+    obj->curSize++;
+}
+
+void frontMiddleBackQueuePushBack(FrontMiddleBackQueue* obj, int value) {
+    DLL* D = (DLL*)malloc(sizeof(DLL));
+    D->val = value;
+    D->next = NULL;
+    D->prev = NULL;
+
+    if (obj->curSize == 0) {
+        obj->LL = obj->front = obj->rear = obj->middle = D;
+    } else {
+        D->prev = obj->rear;
+        obj->rear->next = D;
+        obj->rear = D;
+        if (obj->curSize % 2 == 0) {
+            obj->middle = obj->middle->next;
+        }
+    }
+    obj->curSize++;
+}
+
+int frontMiddleBackQueuePopFront(FrontMiddleBackQueue* obj) {
+    if (obj->curSize == 0) return -1;
+
+    int v = obj->front->val;
+    DLL* del_node = obj->front;
+
+    if (obj->curSize == 1) {
+        obj->LL = obj->rear = obj->front = obj->middle = NULL;
+    } else {
+        obj->front = obj->front->next;
+        obj->front->prev = NULL;
+        if (obj->curSize % 2 == 0) {
+            obj->middle = obj->middle->next;
+        }
+    }
+    free(del_node);
+    obj->curSize--;
+    return v;
+}
+
+int frontMiddleBackQueuePopMiddle(FrontMiddleBackQueue* obj) {
+    if (obj->curSize == 0) return -1;
+
+    int v = obj->middle->val;
+    DLL* del_node = obj->middle;
+
+    if (obj->curSize == 1) {
+        obj->LL = obj->rear = obj->front = obj->middle = NULL;
+    } else if (obj->curSize == 2) {
+        obj->LL = obj->rear = obj->front = obj->middle = obj->front->next;
+        obj->front->prev = NULL;
+        obj->front->next = NULL;
+    } else {
+        if (obj->middle->prev) obj->middle->prev->next = obj->middle->next;
+        if (obj->middle->next) obj->middle->next->prev = obj->middle->prev;
+
+        if (obj->curSize % 2 == 1) {
+            obj->middle = del_node->prev;
+        } else {
+            obj->middle = del_node->next;
+        }
+
+        if (del_node == obj->front) obj->front = del_node->next;
+        if (del_node == obj->rear) obj->rear = del_node->prev;
+    }
+
+    free(del_node);
+    obj->curSize--;
+    return v;
+}
+
+int frontMiddleBackQueuePopBack(FrontMiddleBackQueue* obj) {
+    if (obj->curSize == 0) return -1;
+
+    int v = obj->rear->val;
+    DLL* del_node = obj->rear;
+
+    if (obj->curSize == 1) {
+        obj->LL = obj->rear = obj->front = obj->middle = NULL;
+    } else {
+        obj->rear = obj->rear->prev;
+        obj->rear->next = NULL;
+        if (obj->curSize % 2 == 1) {
+            obj->middle = obj->middle->prev;
+        }
+    }
+    free(del_node);
+    obj->curSize--;
+    return v;
+}
+
+void frontMiddleBackQueueFree(FrontMiddleBackQueue* obj) {
+    while (obj->curSize > 0) {
+        frontMiddleBackQueuePopBack(obj);
+    }
+    free(obj);
+}

@@ -1,0 +1,123 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_ORDERS 100000
+#define MOD 1000000007
+
+typedef struct {
+    int price;
+    int amount;
+} Order;
+
+Order buyHeap[MAX_ORDERS];
+Order sellHeap[MAX_ORDERS];
+int buySize = 0, sellSize = 0;
+
+// Buy max-heap: highest price has priority
+void pushBuy(Order o) {
+    int i = buySize++;
+    while (i > 0) {
+        int p = (i - 1) / 2;
+        if (buyHeap[p].price >= o.price) break;
+        buyHeap[i] = buyHeap[p];
+        i = p;
+    }
+    buyHeap[i] = o;
+}
+
+Order popBuy() {
+    Order ret = buyHeap[0];
+    Order tmp = buyHeap[--buySize];
+    int i = 0;
+    while (i * 2 + 1 < buySize) {
+        int a = i * 2 + 1;
+        int b = i * 2 + 2;
+        int maxIdx = a;
+        if (b < buySize && buyHeap[b].price > buyHeap[a].price) maxIdx = b;
+        if (buyHeap[maxIdx].price <= tmp.price) break;
+        buyHeap[i] = buyHeap[maxIdx];
+        i = maxIdx;
+    }
+    buyHeap[i] = tmp;
+    return ret;
+}
+
+Order topBuy() {
+    return buyHeap[0];
+}
+
+// Sell min-heap: lowest price has priority
+void pushSell(Order o) {
+    int i = sellSize++;
+    while (i > 0) {
+        int p = (i - 1) / 2;
+        if (sellHeap[p].price <= o.price) break;
+        sellHeap[i] = sellHeap[p];
+        i = p;
+    }
+    sellHeap[i] = o;
+}
+
+Order popSell() {
+    Order ret = sellHeap[0];
+    Order tmp = sellHeap[--sellSize];
+    int i = 0;
+    while (i * 2 + 1 < sellSize) {
+        int a = i * 2 + 1;
+        int b = i * 2 + 2;
+        int minIdx = a;
+        if (b < sellSize && sellHeap[b].price < sellHeap[a].price) minIdx = b;
+        if (sellHeap[minIdx].price >= tmp.price) break;
+        sellHeap[i] = sellHeap[minIdx];
+        i = minIdx;
+    }
+    sellHeap[i] = tmp;
+    return ret;
+}
+
+Order topSell() {
+    return sellHeap[0];
+}
+
+int getNumberOfBacklogOrders(int** orders, int ordersSize, int* ordersColSize) {
+    buySize = sellSize = 0;
+    long long res = 0;
+    
+    for (int i = 0; i < ordersSize; i++) {
+        int price = orders[i][0];
+        int amount = orders[i][1];
+        int type = orders[i][2];
+        int sum = amount;
+
+        if (type == 0) {
+            while (sellSize > 0 && topSell().price <= price && amount > 0) {
+                Order top = popSell();
+                int traded = top.amount < amount ? top.amount : amount;
+                amount -= traded;
+                top.amount -= traded;
+                if (top.amount > 0) pushSell(top);
+            }
+            if (amount > 0) {
+                Order newOrder = {price, amount};
+                pushBuy(newOrder);
+            }
+        } else {
+            while (buySize > 0 && topBuy().price >= price && amount > 0) {
+                Order top = popBuy();
+                int traded = top.amount < amount ? top.amount : amount;
+                amount -= traded;
+                top.amount -= traded;
+                if (top.amount > 0) pushBuy(top);
+            }
+            if (amount > 0) {
+                Order newOrder = {price, amount};
+                pushSell(newOrder);
+            }
+        }
+
+        res += (long long)(amount * 2 - sum);
+    }
+
+    return (int)((res % MOD + MOD) % MOD);
+}

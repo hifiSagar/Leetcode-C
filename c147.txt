@@ -1,0 +1,27 @@
+char *largestMultipleOfThree(int *digits, int digitsSize) {
+    char *ret = malloc(digitsSize + 1), *ptr = ret;
+    int counts[10] = {0}, mod_buckets[3] = {0}, sum = 0;
+    
+    for (int i = 0; i < digitsSize; ++i) {
+        sum += digits[i];
+        counts[digits[i]] += 1;
+        mod_buckets[digits[i] % 3] += 1;
+    }
+    
+    if (sum % 3 != 0) {
+        if (mod_buckets[sum % 3] > 0)
+            mod_buckets[sum % 3] -= 1;
+        else
+            mod_buckets[3 - (sum % 3)] -= 2;
+    }
+
+    if (sum == 0)
+        counts[0] = 1;
+
+    for (int i = 9; i >= 0; --i)
+        while (counts[i]-- > 0 && mod_buckets[i % 3]-- > 0)
+            *ptr++ = '0' + i;
+
+    *ptr = '\0';
+    return ret;
+}

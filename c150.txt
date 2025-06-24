@@ -1,0 +1,14 @@
+int maxDistToClosest(int* seats, int seatsSize) {
+    int prev = -1, max_distance = 0;
+    for (int i = 0; i < seatsSize; i++) {
+        if (seats[i] == 1) {
+            max_distance = prev < 0 ? i : (max_distance > (i - prev) / 2 ? max_distance : (i - prev) / 2);
+            prev = i;
+        }
+    }
+    if (seats[seatsSize - 1] == 0) {
+        int end_distance = seatsSize - 1 - prev;
+        if (end_distance > max_distance) max_distance = end_distance;
+    }
+    return max_distance;
+}

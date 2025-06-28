@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <math.h>
+
+#define MAX_K 10
+#define MAX_N 4
+#define MAX_SIZE 10000
+
+bool visited[MAX_SIZE];
+char result[MAX_SIZE];
+int pos = 0;
+int k, n;
+int total_combinations;
+
+void dfs(int node, int mod) {
+    for (int i = 0; i < k; ++i) {
+        int next = node * k + i;
+        if (!visited[next]) {
+            visited[next] = true;
+            dfs(next % mod, mod);
+            result[pos++] = '0' + i;
+        }
+    }
+}
+
+char* crackSafe(int nn, int kk) {
+    n = nn;
+    k = kk;
+    pos = 0;
+    total_combinations = (int)pow(k, n);
+    memset(visited, false, sizeof(visited));
+    int mod = (int)pow(k, n - 1);
+    dfs(0, mod);
+    for (int i = 0; i < n - 1; ++i)
+        result[pos++] = '0';
+    result[pos] = '\0';
+    return strdup(result);
+}

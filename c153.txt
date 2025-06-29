@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+typedef struct Node {
+    int val;
+    int min;
+    struct Node* next;
+} Node;
+
+typedef struct {
+    Node* head;
+} MinStack;
+
+MinStack* minStackCreate() {
+    MinStack* stack = (MinStack*)malloc(sizeof(MinStack));
+    stack->head = NULL;
+    return stack;
+}
+
+void minStackPush(MinStack* stack, int val) {
+    int newMin = (stack->head == NULL) ? val : (val < stack->head->min ? val : stack->head->min);
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    newNode->val = val;
+    newNode->min = newMin;
+    newNode->next = stack->head;
+    stack->head = newNode;
+}
+
+void minStackPop(MinStack* stack) {
+    if (stack->head != NULL) {
+        Node* temp = stack->head;
+        stack->head = stack->head->next;
+        free(temp);
+    }
+}
+
+int minStackTop(MinStack* stack) {
+    if (stack->head != NULL) {
+        return stack->head->val;
+    }
+    return INT_MIN;
+}
+
+int minStackGetMin(MinStack* stack) {
+    if (stack->head != NULL) {
+        return stack->head->min;
+    }
+    return INT_MIN;
+}
+
+void minStackFree(MinStack* stack) {
+    while (stack->head != NULL) {
+        minStackPop(stack);
+    }
+    free(stack);
+}

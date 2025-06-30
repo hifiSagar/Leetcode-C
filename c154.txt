@@ -1,0 +1,40 @@
+typedef struct dict {
+    char *s;
+    int len;
+} dictionary;
+
+int dp[300];
+dictionary dict[1000];
+
+bool checkWord(char *s, dictionary *dict, int wordDictSize, int idx) {
+    bool is_match = false;
+
+    if(s[idx] == 0) {
+        return true;
+    }
+    if(dp[idx] != -1) {
+        return((dp[idx] == 1) ? true : false);
+    }
+    for(int i = 0; i <wordDictSize; i++) {
+        if(strncmp(&s[idx], dict[i].s, dict[i].len) == 0) {
+            is_match = checkWord(s,dict, wordDictSize, idx + dict[i].len);
+
+            if(is_match) {
+                break;
+            }
+        }
+    }
+    dp[idx] = ((is_match == true) ? 1 : 0);
+
+    return is_match;
+}
+bool wordBreak(char* s, char** wordDict, int wordDictSize) {
+    for(int i = 0; i < wordDictSize; i++) {
+        dict[i].s = wordDict[i];
+        dict[i].len = strlen(wordDict[i]);
+    }
+    for(int i = 0; i < strlen(s); i++) {
+        dp[i] = -1;
+    }
+    return checkWord(s, dict, wordDictSize, 0);
+}

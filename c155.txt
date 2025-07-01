@@ -1,0 +1,11 @@
+#include <stdlib.h>
+
+void rotate(int* nums, int n, int k) {
+    k %= n;
+    int* new = malloc(n * sizeof(int));
+    for (int i = 0; i < n; i++)
+        new[(i + k) % n] = nums[i];
+    for (int i = 0; i < n; i++)
+        nums[i] = new[i];
+    free(new);
+}

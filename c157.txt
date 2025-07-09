@@ -1,0 +1,64 @@
+typedef struct {
+    int data[100];
+    int top;
+} Stack;
+
+void push(Stack* s, int val) {
+    s->data[++s->top] = val;
+}
+
+int pop(Stack* s) {
+    return s->data[s->top--];
+}
+
+int peek(Stack* s) {
+    return s->data[s->top];
+}
+
+bool isEmpty(Stack* s) {
+    return s->top == -1;
+}
+
+typedef struct {
+    Stack in_stack;
+    Stack out_stack;
+} MyQueue;
+
+MyQueue* myQueueCreate() {
+    MyQueue* q = malloc(sizeof(MyQueue));
+    q->in_stack.top = -1;
+    q->out_stack.top = -1;
+    return q;
+}
+
+void transfer(MyQueue* obj) {
+    while (!isEmpty(&obj->in_stack)) {
+        push(&obj->out_stack, pop(&obj->in_stack));
+    }
+}
+
+void myQueuePush(MyQueue* obj, int x) {
+    push(&obj->in_stack, x);
+}
+
+int myQueuePop(MyQueue* obj) {
+    if (isEmpty(&obj->out_stack)) {
+        transfer(obj);
+    }
+    return pop(&obj->out_stack);
+}
+
+int myQueuePeek(MyQueue* obj) {
+    if (isEmpty(&obj->out_stack)) {
+        transfer(obj);
+    }
+    return peek(&obj->out_stack);
+}
+
+bool myQueueEmpty(MyQueue* obj) {
+    return isEmpty(&obj->in_stack) && isEmpty(&obj->out_stack);
+}
+
+void myQueueFree(MyQueue* obj) {
+    free(obj);
+}
